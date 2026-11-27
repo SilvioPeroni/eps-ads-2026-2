@@ -45,14 +45,17 @@ public class CarService {
     public CarService(CarRepository repository) {
         this.repository = repository;
 
-        // Montagem da Cadeia de Responsabilidade: 1 -> 2 -> 3
         RequestValidator<CarRequest> platesValidator =
             new UniquePlatesValidator(repository, null);
 
         RequestValidator<CarRequest> saleValidator =
-            new SaleDataValidator(platesValidator);
+            new SaleDataValidator(null);
 
-        this.validator = new ManufactureYearValidator(saleValidator);
+        RequestValidator<CarRequest> manufactureValidator =
+            new ManufactureYearValidator(saleValidator);
+
+        platesValidator = new UniquePlatesValidator(repository, manufactureValidator);
+        this.validator = platesValidator;
     }
 
     public Car create(CarRequest request) {

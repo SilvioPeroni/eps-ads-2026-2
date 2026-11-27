@@ -10,6 +10,8 @@ import br.edu.fatecfranca.api.entities.User;
 import br.edu.fatecfranca.api.repositories.UserRepository;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import br.edu.fatecfranca.api.dtos.LoginRequest;
 
@@ -65,6 +67,7 @@ public class UserService {
     }
 
     public User create(UserRequest request) {
+        validateUniqueFields(request, null);
         User user = new User();
 
         copyToEntity(request, user);
@@ -81,6 +84,7 @@ public class UserService {
     }
 
     public User update(Long id, UserRequest request) {
+        validateUniqueFields(request, id);
         User user = new User();
 
         copyToEntity(request, user);
@@ -96,5 +100,25 @@ public class UserService {
 
     public void deleteById(Long id) {
         repository.deleteById(id);
+    }
+
+    private void validateUniqueFields(UserRequest request, Long userId) {
+        boolean usernameExists = userId == null
+                ? repository.existsByUsername(request.username())
+                : repository.existsByUsernameAndIdNot(request.username(), userId);
+        if (usernameExists) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "O nome de usuário informado já está cadastrado.");
+        }
+
+        boolean emailExists = userId == null
+                ? repository.existsByEmail(request.email())
+                : repository.existsByEmailAndIdNot(request.email(), userId);
+        if (emailExists) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "O e-mail informado já está cadastrado.");
+        }
     }
 }

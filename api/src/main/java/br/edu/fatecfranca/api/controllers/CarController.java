@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import br.edu.fatecfranca.api.dtos.CarRequest;
 import br.edu.fatecfranca.api.entities.Car;
 import br.edu.fatecfranca.api.services.CarService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/cars")
@@ -28,7 +29,7 @@ public class CarController {
     }
 
     @PostMapping
-    public ResponseEntity<Car> create(@RequestBody CarRequest request) {
+    public ResponseEntity<Car> create(@Valid @RequestBody CarRequest request) {
         Car savedCar = service.create(request);
 
         return ResponseEntity
@@ -51,7 +52,7 @@ public class CarController {
     @PutMapping("/{id}")
     public ResponseEntity<Car> update(
             @PathVariable Long id,
-            @RequestBody CarRequest request) {
+            @Valid @RequestBody CarRequest request) {
 
         if (!service.existsById(id)) {
             return ResponseEntity.notFound().build();
